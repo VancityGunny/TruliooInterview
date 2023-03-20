@@ -1,18 +1,24 @@
 const express = require('express');
-
+const bodyParser = require('body-parser');
 const User = require('./login_modules/user');
+const auth = require('./login_modules/auth_helper');
 const app = express();
 const port = 3000;
 
-app.post('/api/register', (req, res) => {
+app.use(bodyParser.json());
+
+// TODO: these endpoint should have their own controller and not here in the default
+app.post('/api/register', 
+    auth.validateRegister,
+    (req, res) => {
     // read body and create new user
     // automatically login
-    res.status(200).json({ message: 'successfully registered'});
+    return auth.registerNewUser(req,res);    
 });
 
 app.post('/api/login', (req, res) => {
     // login user
-    res.status(200).json({ message: 'successfully login'});
+    return auth.login(req,res);    
 });
 
 
