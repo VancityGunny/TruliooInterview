@@ -8,7 +8,7 @@ describe('UserRepository', () => {
 
   before(async () => {
     const uri = process.env.MONGODB_URI;
-    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     await client.connect();
     db = client.db();    
     userRepo = new UserRepository(db);
