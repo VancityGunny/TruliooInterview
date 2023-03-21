@@ -25,7 +25,12 @@ describe('Registration endpoint', () => {
     beforeEach(() => {
       sinon.restore();
     });
-  
+      
+    afterEach(async () => {
+      await app.close();
+      await mockClient.close();
+    });
+
     it('should return error if email is invalid', async () => {
       const response = await request(app)
         .post('/api/register')
