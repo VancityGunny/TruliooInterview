@@ -18,6 +18,8 @@
     "express-validator": "^6.15.0",
     "jsonwebtoken": "^9.0.0",
     "mocha": "^10.2.0",
+    "mongodb": "^5.1.0",
+    "sinon": "^15.0.2",
     "supertest": "^6.3.3"
   }
 }

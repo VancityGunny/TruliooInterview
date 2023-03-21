@@ -29,6 +29,6 @@ class User{
             firstname : this.firstname,
             lastname : this.lastname
         }
-    }
+    }    
 }
 module.exports = User;

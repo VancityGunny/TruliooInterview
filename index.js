@@ -16,7 +16,7 @@ app.post('/api/register',
     return auth.registerNewUser(req,res);    
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', auth.validateLogin, (req, res) => {
     // login user
     return auth.login(req,res);    
 });

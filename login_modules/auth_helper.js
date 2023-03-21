@@ -1,5 +1,21 @@
 const {body, validationResult}  = require('express-validator');
+const {MongoClient } = require('mongodb');
 const User = require("../login_modules/user");
+const UserRepository = require("./user_repository");
+
+
+// TODO: register this env param before testing this
+//export MONGODB_URI=mongodb://localhost:27017/trulioodb
+
+
+async function connectToDatabase() {
+  
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  await client.connect();
+  const db = client.db();
+  return {client, db};
+}
 
 // use same length restriction for firstname, lastname for now
 // TODO: move this to somewhere easy to find and config too
@@ -42,10 +58,11 @@ exports.registerNewUser = async (req, res) => {
         }
     
         const user = new User(req.body);
-        await user.hashPassword();
-    
-        // TODO: Save the user to the database
-    
+        await user.hashPassword();  // hash the password before saving to db
+        const {client,db} = await connectToDatabase();
+        const userRepo = new UserRepository(db);
+        await userRepo.createUser(user);
+        client.close();
         const token = user.generateAuthToken();
         res.json({ token, user: user.toJSON() });
       } catch (error) {
@@ -55,7 +72,7 @@ exports.registerNewUser = async (req, res) => {
 }
 
 //TODO: all these error message should be store in resource file that allow it to be localized too
-exports.validateRegister = [
+exports.validateLogin = [
     body('email')
         .trim()
         .isEmail()
@@ -74,20 +91,20 @@ exports.login = async (req, res) => {
           return res.status(422).json({ errors: errors.array() });
         }
     
-        const { email, password } = req.body;
-        
+        const { email, password } = req.body;        
+        const {client,db} = await connectToDatabase();
+        const userRepo = new UserRepository(db);
         // TODO: Find user matching the email
-        // PUT in fake user for now to make test passed
-        let user = new User({email:'gunny@hey.com',firstname:'Gunny',lastname:'Baby',password:'12345678'});
-
-        // if (!user) {
-        //   return res.status(400).json({ message: 'Cannot find user' });
-        // }
+        let user =await userRepo.findUserByEmail(email);
+        client.close();
+        if (!user) {
+          return res.status(400).json({ message: 'Cannot find user' });
+        }
     
-        // const isPasswordCorrect = await user.comparePassword(password);
-        // if (!isPasswordCorrect) {
-        //   return res.status(400).json({ message: 'Invalid password' });
-        // }
+        const isPasswordCorrect = await user.comparePassword(password);
+        if (!isPasswordCorrect) {
+          return res.status(400).json({ message: 'Invalid password' });
+        }
     
         const token = user.generateAuthToken();
         res.json({ token, user: user.toJSON() });
