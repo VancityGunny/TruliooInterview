@@ -15,7 +15,6 @@ describe('UserRepository', () => {
   });
 
   after(async () => {
-    //await client.close();
     await client.close();
     //await db.close();
   });
